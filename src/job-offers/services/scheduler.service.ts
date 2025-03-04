@@ -1,6 +1,5 @@
-// src/job-offers/services/scheduler.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, SchedulerRegistry } from '@nestjs/schedule';
+import { SchedulerRegistry } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
 import { ApiFetchService } from './api-fetch.service';
 import { TransformService } from './transform.service';
@@ -36,11 +35,12 @@ export class SchedulerService {
             this.logger.log('Scheduled job offer fetch completed successfully');
         } catch (error) {
             this.logger.error('Scheduled job offer fetch failed', error.stack);
+            // Don’t throw; cron should continue running
         }
     }
 
     private setupCronJob() {
-        const cronSchedule = this.configService.get<string>('CRON_SCHEDULE', '0 * * * *'); // Default: every hour
+        const cronSchedule = this.configService.get<string>('CRON_SCHEDULE', '0 * * * *');
         const job = new CronJob(cronSchedule, () => this.fetchAndSave());
 
         this.schedulerRegistry.addCronJob('fetchJobOffers', job);

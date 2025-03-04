@@ -1,7 +1,6 @@
-// src/job-offers/services/job-offer.service.ts
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, Like } from 'typeorm';
+import { Repository } from 'typeorm';
 import { JobOffer } from '../entities/job-offer.entity';
 
 @Injectable()
@@ -15,15 +14,14 @@ export class JobOfferService {
 
     async saveJobOffers(jobOffers: JobOffer[]): Promise<void> {
         this.logger.log(`Saving ${jobOffers.length} job offers to the database`);
-        for (const job of jobOffers) {
-            try {
-                await this.jobOfferRepository.upsert(job, ['id']);
-            } catch (error) {
-                this.logger.error(`Failed to save job offer ${job.id}`, error.stack);
-                throw error;
-            }
+        try {
+            // Batch upsert for efficiency
+            await this.jobOfferRepository.upsert(jobOffers, ['id']);
+            this.logger.log('Job offers saved successfully');
+        } catch (error) {
+            this.logger.error('Failed to save job offers', error.stack);
+            throw new InternalServerErrorException('Failed to save job offers to the database');
         }
-        this.logger.log('Job offers saved successfully');
     }
 
     async findJobOffers(
@@ -38,7 +36,6 @@ export class JobOfferService {
     ): Promise<{ data: JobOffer[]; total: number }> {
         const query = this.jobOfferRepository.createQueryBuilder('job');
 
-        // Apply filters
         if (filters.title) {
             query.andWhere('job.title ILIKE :title', { title: `%${filters.title}%` });
         }
@@ -46,13 +43,14 @@ export class JobOfferService {
             query.andWhere('job.location ILIKE :location', { location: `%${filters.location}%` });
         }
         if (filters.minSalary !== undefined) {
+            if (isNaN(filters.minSalary)) throw new BadRequestException('minSalary must be a number');
             query.andWhere('job.minSalary >= :minSalary', { minSalary: filters.minSalary });
         }
         if (filters.maxSalary !== undefined) {
+            if (isNaN(filters.maxSalary)) throw new BadRequestException('maxSalary must be a number');
             query.andWhere('job.maxSalary <= :maxSalary', { maxSalary: filters.maxSalary });
         }
 
-        // Pagination
         const skip = (page - 1) * limit;
         query.skip(skip).take(limit);
 
@@ -61,10 +59,11 @@ export class JobOfferService {
             return { data, total };
         } catch (error) {
             this.logger.error('Failed to fetch job offers', error.stack);
-            throw new BadRequestException('Invalid query parameters');
+            throw new InternalServerErrorException('Failed to retrieve job offers');
         }
     }
     async findAll(): Promise<JobOffer[]> {
         return this.jobOfferRepository.find();
     }
 }
+
