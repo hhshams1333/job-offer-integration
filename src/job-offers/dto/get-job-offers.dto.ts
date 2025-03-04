@@ -1,4 +1,3 @@
-// src/job-offers/dto/get-job-offers.dto.ts
 import { IsOptional, IsString, IsNumber, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
