@@ -3,18 +3,18 @@ import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, Inde
 @Entity('job_offers')
 export class JobOffer {
     @PrimaryColumn()
-    @Index({ unique: true }) // Ensure no duplicate IDs
+    @Index({ unique: true })
     id: string;
 
     @Column()
-    @Index() // Index for filtering by title
+    @Index()
     title: string;
 
-    @Column({ nullable: true })
-    @Index() // Index for filtering by location
+    @Column({ type: 'text', nullable: true })
+    @Index()
     location: string | null;
 
-    @Column({ nullable: true })
+    @Column({ type: 'text', nullable: true })
     type: string | null;
 
     @Column({ type: 'boolean', default: false })
@@ -26,16 +26,16 @@ export class JobOffer {
     @Column({ type: 'float', nullable: true })
     maxSalary: number | null;
 
-    @Column({ nullable: true })
+    @Column({ type: 'text', nullable: true })
     currency: string | null;
 
     @Column()
     companyName: string;
 
-    @Column({ nullable: true })
+    @Column({ type: 'text', nullable: true })
     industry: string | null;
 
-    @Column({ nullable: true })
+    @Column({ type: 'text', nullable: true })
     website: string | null;
 
     @Column('text', { array: true })
