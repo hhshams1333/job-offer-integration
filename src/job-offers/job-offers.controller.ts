@@ -1,9 +1,10 @@
-import { Controller, Get, Query, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiFetchService } from './services/api-fetch.service';
 import { TransformService } from './services/transform.service';
 import { JobOfferService } from './services/job-offer.service';
 import { JobOffer } from './entities/job-offer.entity';
 import { GetJobOffersDto } from './dto/get-job-offers.dto';
+import { SchedulerService } from './services/scheduler.service';
 
 @Controller('api')
 export class JobOffersController {
@@ -11,6 +12,7 @@ export class JobOffersController {
         private readonly apiFetchService: ApiFetchService,
         private readonly transformService: TransformService,
         private readonly jobOfferService: JobOfferService,
+        private readonly schedulerService: SchedulerService,
     ) { }
 
     @Get('job-offers')
@@ -24,6 +26,13 @@ export class JobOffersController {
             page,
             limit,
         );
+    }
+
+    @Post('schedule')
+    @UsePipes(new ValidationPipe())
+    updateSchedule(@Body('cronSchedule') cronSchedule: string) {
+        this.schedulerService.updateCronSchedule(cronSchedule);
+        return { message: `Schedule updated to ${cronSchedule}` };
     }
 
     @Get('provider1')
