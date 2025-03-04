@@ -3,46 +3,46 @@ import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn } fro
 @Entity('job_offers')
 export class JobOffer {
     @PrimaryColumn()
-    id: string; // Unified ID (e.g., "P1-744" or "job-926")
+    id: string;
 
     @Column()
-    title: string; // "title" from Structure A, "position" from Structure B
+    title: string;
 
     @Column({ nullable: true })
-    location: string; // Combined location (e.g., "New York, NY" or "San Francisco, TX")
+    location: string | null; // Adjusted to allow null
 
     @Column({ nullable: true })
-    type: string; // "type" from Structure A, optional for Structure B
+    type: string | null; // Adjusted to allow null
 
     @Column({ type: 'boolean', default: false })
-    remote: boolean; // From Structure B, default to false if not provided
+    remote: boolean;
 
     @Column({ type: 'float', nullable: true })
-    minSalary: number; // Parsed from "salaryRange" or "compensation.min"
+    minSalary: number | null; // Adjusted to allow null
 
     @Column({ type: 'float', nullable: true })
-    maxSalary: number; // Parsed from "salaryRange" or "compensation.max"
+    maxSalary: number | null; // Adjusted to allow null
 
     @Column({ nullable: true })
-    currency: string; // From Structure B or inferred (e.g., "USD")
+    currency: string | null; // Adjusted to allow null
 
     @Column()
-    companyName: string; // "company.name" from A, "employer.companyName" from B
+    companyName: string;
 
     @Column({ nullable: true })
-    industry: string; // From Structure A, optional
+    industry: string | null; // Adjusted to allow null
 
     @Column({ nullable: true })
-    website: string; // From Structure B, optional
+    website: string | null; // Adjusted to allow null
 
     @Column('text', { array: true })
-    skills: string[]; // "skills" from A, "requirements.technologies" from B
+    skills: string[];
 
     @Column({ type: 'int', nullable: true })
-    experience: number; // From Structure B, optional
+    experience: number | null; // Adjusted to allow null
 
     @Column()
-    postedDate: Date; // Parsed from both structures
+    postedDate: Date;
 
     @CreateDateColumn()
     createdAt: Date;
