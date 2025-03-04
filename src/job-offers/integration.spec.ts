@@ -1,18 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { HttpModule, HttpService } from '@nestjs/axios';
+import { HttpModule } from '@nestjs/axios';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
 import { JobOffersModule } from './job-offers.module';
 import { JobOffer } from './entities/job-offer.entity';
 import { ApiFetchService } from './services/api-fetch.service';
-import { of } from 'rxjs';
+import * as request from 'supertest';
 import { SchedulerService } from './services/scheduler.service';
 
 describe('JobOffers Integration', () => {
     let app: INestApplication;
-    let httpService: HttpService;
 
     beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -61,7 +60,6 @@ describe('JobOffers Integration', () => {
             .compile();
 
         app = moduleFixture.createNestApplication();
-        httpService = moduleFixture.get(HttpService);
         await app.init();
     });
 
@@ -70,12 +68,10 @@ describe('JobOffers Integration', () => {
     });
 
     it('should fetch, transform, and store data, then retrieve via API', async () => {
-        // Mock HTTP responses (already mocked via ApiFetchService override)
         const schedulerService = app.get<SchedulerService>(SchedulerService);
         await (schedulerService as any).fetchAndSave();
 
-        // Test API endpoint
-        const response = await app.getHttpServer()
+        const response = await request(app.getHttpServer())
             .get('/api/job-offers')
             .expect(200);
 
